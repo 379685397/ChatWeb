@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Webtap </title>
+    <link th:href="@{${cdn}+'admin/css/bootstrap.min.css'}" rel="stylesheet">
+    <link href="/admin/css/fontawesome.min.css" rel="stylesheet">
+    <link th:href="@{${cdn}+'admin/css/styles.min.css'}" rel="stylesheet">
+    <style>
+        .dirty {
+            border-color: #5A5;
+            background: #EFE !important;
+        }
+
+        .dirty:focus {
+            outline-color: #8E8;
+        }
+
+        .error {
+            border-color: red;
+            background: #FDD !important;
+        }
+
+        .error:focus {
+            outline-color: #F99;
+        }
+
+        .val-error {
+            color: red;
+            padding-top: 5px;
+        }
+
+        [v-cloak] {
+            display: none;
+        }
+
+        #fileManager .item-img img {
+            width: auto;
+            min-height: 60px;
+            min-width: 60px;
+            max-width: 60px;
+            max-height: 60px;
+            position: absolute;
+            display: block;
+            transform: translate(-50%, -50%);
+        }
+
+        #fileManager .item-img {
+            position: relative;
+            height: 90px;
+            /* width: 90px; */
+            overflow: hidden;
+            display: block;
+            border: 1px solid #eee;
+            border-bottom: 0;
+            border-top-right-radius: .25rem;
+            border-top-left-radius: .25rem;
+            cursor: pointer;
+        }
+
+        .page-title {
+            font-size: 26px;
+            letter-spacing: -1px;
+            display: block;
+            color: rgb(102, 102, 102);
+            font-weight: 300;
+            font-family: 微软雅黑, sans-serif;
+            padding: 0px;
+            margin-left: 30px;
+            margin-top: 15px;
+            border-bottom: #CCCCCC;
+        }
+
+        .input-group-addon {
+            padding: 6px 12px;
+            font-size: 14px;
+            font-weight: 400;
+            color: #555;
+            text-align: center;
+            background-color: #eee;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            white-space: nowrap;
+            vertical-align: middle;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+            border-right: 0;
+        }
+    </style>
+</head>
+
+<body>
+<div class="bf">
+    <ul class="bf-taskbar d-flex flex-lg-column">
+        <li class="taskbar-item">
+            <a class="taskbar-item-link" href="/admin/app/edit" title="添加应用">
+                <i class="taskbar-item-icon fas fa-plus"></i>
+            </a>
+        </li>
+        <li class="taskbar-item">
+            <a href="/admin/app/list" class="taskbar-item-link" title="应用列表">
+                <i class="taskbar-item-icon fas fa-align-left"></i>
+            </a>
+        </li>
+        <li class="taskbar-item">
+            <a href="/admin/settings/organization" class="taskbar-item-link" title="设置">
+                <i class="taskbar-item-icon fas fa-cog"></i>
+            </a>
+        </li>
+
+
+        <li class="taskbar-item ml-auto ml-lg-0 mt-lg-auto">
+            <a class="taskbar-item-link" href="/" title="访问首页" target="_blank"><i
+                    class="taskbar-item-icon fas fa-globe"></i></a>
+        </li>
+        <li class="taskbar-item">
+            <a class="taskbar-item-link" href="/logout" title="退出"><i class="taskbar-item-icon fas fa-sign-out-alt"></i></a>
+        </li>
+    </ul>
+
+
+    <div layout:fragment="content"></div>
+
+</div>
+
+<script th:src="@{${cdn}+'js/vue.min.js'}"></script>
+<script th:src="@{${cdn}+'js/axios.min.js'}"></script>
+<script th:src="@{${cdn}+'js/validators.min.js'}"></script>
+<script th:src="@{${cdn}+'js/vuelidate.min.js'}"></script>
+
+
+<script th:src="@{${cdn}+'admin/js/lib/jquery.min.js'}"></script>
+<script th:src="@{${cdn}+'admin/js/lib/toastr.min.js'}"></script>
+<script th:src="@{${cdn}+'admin/js/lib/popper.min.js'}"></script>
+<script th:src="@{${cdn}+'admin/js/lib/bootstrap.min.js'}"></script>
+<script th:src="@{${cdn}+'admin/js/app/app.js'}"></script>
+<script th:src="@{${cdn}+'admin/js/app/dataService.js'}"></script>
+<script th:src="@{${cdn}+'admin/js/app/notificationsController.js'}"></script>
+<script>
+    var webRoot = '/';
+
+    var hostname = location.hostname;
+    var port = location.port;
+    if (port == "80" || port == "") {
+        webRoot = "http://" + hostname + "/";
+    } else {
+        webRoot = "http://" + hostname + ":" + port + "/";
+    }
+
+    function isAdmin() {
+        return 'True' === 'True' ? true : false;
+    }
+
+    function getUrl(str) {
+        return webRoot + str;
+    }
+
+    $(function () {
+        var url = location.href;
+        var items = $(".taskbar-item");
+        var sidebar = $(".bf-settings-sidebar-nav li a");
+        $.each(items, function (i, item) {
+            var taskurl = $(item).find('a').attr('href');
+            if (url.indexOf(taskurl) > 0) {
+                $(item).addClass('active')
+            } else {
+                $(item).removeClass('active')
+            }
+        })
+        $.each(sidebar, function (i, a) {
+            var ahref = $(a).attr('href');
+            var css = url.indexOf(ahref) > 0 ? "#5731b3" : "#aaa";
+            $(a).css('color', css);
+        })
+    });
+
+</script>
+
+
+<th:block layout:fragment="bodyAssets">
+</th:block>
+<style>
+
+</style>
+</body>
+</html>

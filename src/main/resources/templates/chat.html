@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="height=device-height, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>LiteChat_Frame
+    </title>
+    <link rel="stylesheet" type="text/css" href="/css/litewebchat.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/litewebchat_input.min.css">
+    <style>
+        /* 全局 */
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .lite-chatmaster {
+            height: 100%;
+            width: 100%;
+        }
+
+        ::-webkit-scrollbar {
+            /* 滚动条整体样式 */
+            width: 3px;
+            /* 高宽分别对应横竖滚动条的尺寸 */
+            height: 1px;
+        }
+    </style>
+</head>
+<body><!-- 主容器 -->
+<div class="lite-chatmaster">
+    <div class="lite-chatbox">
+    </div>
+    <div class="lite-chattools">
+        <div class="lite-chatbox-tool" id="emojiMart" style="display:none"></div>
+        <div id="toolMusk" style="display:none"></div>
+    </div>
+    <div class="lite-chatinput">
+        <hr class="boundary">
+        </svg>
+        <button class="tool-button float-right" id="exitFullScreen" style="display:none" title="退出" type="button">
+            <svg svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024"></svg>
+        </button>
+        <div class="editor chatinput" aria-label="input area" contenteditable="true" ref="editor">
+        </div>
+        <button class="send" onclick="sendMessage()">发送</button>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/emoji-mart@latest/dist/browser.js"></script>
+<script src="/js/litewebchat_input.min.js"></script><!-- 抽离的聊天信息组件 -->
+<script src="/js/litewebchat_render.min.js"></script>
+<script src="/js/jquery.min.js"></script>
+<script>
+    const htmls = [{
+        messageType: 'text',
+        headIcon: '/img/A.jpg',
+        name: 'reboot',
+        position: 'left',
+        html: ` 欢迎使用chat聊天`
+    }];
+    beforeRenderingHTML(htmls, '.lite-chatbox');
+</script>
+<script>
+    const btns = document.querySelectorAll('.theme-switch');
+    const html = document.documentElement;
+    const addEvent = btn => {
+        btn.addEventListener('click', e => {
+            let theme = html.getAttribute("litewebchat-theme");
+            if (theme === 'dark') {
+                html.setAttribute("litewebchat-theme", 'light');
+            } else {
+                html.setAttribute("litewebchat-theme", 'dark');
+            }
+        });
+    };
+    btns.forEach(btn => {
+        addEvent(btn);
+    });
+</script>
+<script>
+
+    // document.querySelector('.send').onclick = function () {
+    //     htmls.push({
+    //         messageType: 'raw',
+    //         headIcon: '../img/B.jpg',
+    //         name: 'SuperPaxxs',
+    //         position: 'right',
+    //         html: document.querySelector('.chatinput').innerHTML
+    //     })
+    //     document.querySelector('.chatinput').innerHTML = '';
+    //     beforeRenderingHTML(htmls, '.lite-chatbox');
+    // };
+
+    //sent message
+    function sendMessage() {
+        var message = document.querySelector('.chatinput').innerHTML;
+        //
+        htmls.push({
+            messageType: 'raw',
+            headIcon: '../img/B.jpg',
+            name: 'user',
+            position: 'right',
+            html: message
+        })
+        document.querySelector('.chatinput').innerHTML = '';
+        beforeRenderingHTML(htmls, '.lite-chatbox');
+        // ajax方式
+        // 参数是一个对象
+        $.ajax({
+            url: 'http://127.0.0.1:8999/createChatCompletion',
+            // 携带参数
+            data: {content: message},
+            dataType: 'json',
+            type: 'POST',
+            timeout: 60000,
+            // 成功的回调函数
+            success: function (data) {
+                console.log(data)
+                htmls.push({
+                    messageType: 'raw',
+                    headIcon: '../img/A.jpg',
+                    name: 'reboot',
+                    position: 'left',
+                    html: data.content
+                })
+                beforeRenderingHTML(htmls, '.lite-chatbox');
+            }
+        });
+    }
+</script>
+</body>
+</html>

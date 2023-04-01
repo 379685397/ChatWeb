@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chatweb.mapper.UserContentDao">
+    <resultMap id="BaseResultMap" type="com.chatweb.model.UserContent">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="user" jdbcType="VARCHAR" property="user"/>
+        <result column="role" jdbcType="VARCHAR" property="role"/>
+        <result column="content" jdbcType="VARCHAR" property="content"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+    id, `user`, `role`, content, create_time
+  </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from user_content
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    <select id="selectForUser" resultType="com.chatweb.model.UserContent">
+        select
+        <include refid="Base_Column_List"/>
+        from user_content
+        where user = #{user,jdbcType=BIGINT}
+        order by create_time desc limit #{size}
+    </select>
+    <select id="selectMessageForUser"
+            resultType="com.chatweb.model.completion.chat.ChatMessage">
+SELECT a.role,a.content from(
+        select
+        id,role,content
+        from user_content
+        where user = #{user} and create_time>=#{time}
+        order by create_time desc
+        LIMIT 10) AS a
+        order by id
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from user_content
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.chatweb.model.UserContent"
+            useGeneratedKeys="true">
+    insert into user_content (`user`, `role`, content, 
+      create_time)
+    values (#{user,jdbcType=VARCHAR}, #{role,jdbcType=VARCHAR}, #{content,jdbcType=VARCHAR}, 
+      #{createTime,jdbcType=TIMESTAMP})
+  </insert>
+    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.chatweb.model.UserContent"
+            useGeneratedKeys="true">
+        insert into user_content
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="user != null">
+                `user`,
+            </if>
+            <if test="role != null">
+                `role`,
+            </if>
+            <if test="content != null">
+                content,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="user != null">
+                #{user,jdbcType=VARCHAR},
+            </if>
+            <if test="role != null">
+                #{role,jdbcType=VARCHAR},
+            </if>
+            <if test="content != null">
+                #{content,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.chatweb.model.UserContent">
+        update user_content
+        <set>
+            <if test="user != null">
+                `user` = #{user,jdbcType=VARCHAR},
+            </if>
+            <if test="role != null">
+                `role` = #{role,jdbcType=VARCHAR},
+            </if>
+            <if test="content != null">
+                content = #{content,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.chatweb.model.UserContent">
+    update user_content
+    set `user` = #{user,jdbcType=VARCHAR},
+      `role` = #{role,jdbcType=VARCHAR},
+      content = #{content,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

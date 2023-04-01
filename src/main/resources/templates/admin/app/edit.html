@@ -1,0 +1,216 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="admin/layout">
+
+    <div layout:fragment="content" >
+        <!-- content-->
+
+        <div class="">
+            <div id="app-body"   class="bf-body">
+
+                <h3 class="page-title">添加应用</h3>
+
+                <form>
+                    <div class="bf-content bf-content-boxed">
+
+
+                        <div class="form-group">
+                            <label class="form-group-label">
+                                名称
+                            </label>
+                            <input type="text" class="form-control" v-model="appdata.title">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-group-label">App Logo</label>
+                            <div class="input-group">
+                                <input   type="text" id="app-logoUrl" name="app-logoUrl" value=""   class="form-control"  />
+                                <span class="input-group-btn">
+                                <button type="button" class="btn btn-secondary btn-upload" v-on:click="openFile()"> 选择</button>
+                               </span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-group-label">
+                                地址
+                            </label>
+                            <input type="text" class="form-control" v-model="appdata.url">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-group-label">
+                                分类
+                            </label>
+                           <div style="height: 40px">
+                               <select class="form-control" style="float:left;width: 90%" id="appCategory" v-model="appdata.categoryId">
+                                   <option  v-for="cate  in categories"   :value="cate.id" >{{cate.name}}</option>
+                               </select>
+                               <a style="float: left;width: 10%" href="#" v-on:click="addCat()" class="btn btn-sm btn-link">新增 <strong>+</strong></a>
+                           </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-group-label">
+                                描述
+                            </label>
+                            <textarea class="form-control" v-model="appdata.description"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-group-label">
+                                敏感信息(账号密码等)
+                            </label>
+                            <textarea class="form-control" v-model="appdata.secContent"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-group-label">
+                                查看权限
+                            </label>
+                            <div style="height: 40px">
+                                <select class="form-control"  id="appPermission" v-model="appdata.viewPermission" >
+                                    <option selected="selected"  value="0" >全部可见</option>
+                                    <option   value="1" >登录可见</option>
+                                    <option   value="2" >自己可见</option>
+                                    <option   value="3" >指定角色可见</option>
+                                </select>
+                                <!--<a style="float: left;width: 10%" href="#" class="btn btn-sm btn-link" >选择角色 <strong>+</strong></a>-->
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-group-label">
+                                查看密码
+                            </label>
+
+                                <div class="input-group">
+                              <span class="input-group-addon">
+                                <input type="checkbox" value="1" v-model="appdata.passwordRequired">
+                              </span>
+                                    <input type="text" v-model="appdata.viewPassword" class="form-control" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" >
+                                </div>
+
+                        </div>
+
+
+                        <div class="form-group">
+                            <label class="form-group-label">
+                                排序
+                            </label>
+                            <input type="text" class="form-control" v-model="appdata.sortNum">
+                        </div>
+
+
+                        <button type="button"  v-on:click="save()"  class="btn btn-primary btn-main">保存</button>
+
+
+                    </div>
+                </form>
+
+
+                <!-- Modal Category -->
+                <div th:replace="admin/fragment/categoryMd::catFragment"></div>
+
+            </div>
+        </div>
+
+        <!-- fragment begin-->
+        <div th:replace="admin/fragment/files :: filesFragment"></div>
+        <!-- fragment end-->
+
+    </div>
+
+
+
+<th:block layout:fragment = "bodyAssets">
+
+    <script>
+        Vue.use(window.vuelidate.default)
+
+        const app = new Vue({
+            el: '#app-body',
+            id:0,
+            data: {
+                category:{editType:"新增"},
+                categories:{},
+                appdata:{}
+            },
+
+            methods: {
+                load: function () {
+
+                    axios.get(webRoot + 'api/app/categories')
+                        .then(response => {
+                        this.categories = response.data;
+                        }).catch(function (error) { toastr.error(error); });
+
+                    if(this.id>0){
+                        axios.get(webRoot + 'api/app/'+this.id)
+                            .then(response => {
+                            this.appdata = response.data;
+                           $("#app-logoUrl").val(this.appdata.logoUrl);
+                            }).catch(function (error) { toastr.error(error); });
+                    }
+                },
+                save: function () {
+                   var posturl =webRoot + 'api/apps/save' ;
+
+                   var logoUrl =  $("#app-logoUrl").val();
+                   if(logoUrl!=""){
+                       if(logoUrl.indexOf('/')>0){
+                           logoUrl =  webRoot + $("#app-logoUrl").val();
+                       }
+                   }
+                   this.appdata.logoUrl = logoUrl;
+                   var app = this.appdata;
+                    app.passwordRequired = app.passwordRequired?"1":"0";
+                    axios.post(posturl, app)
+                        .then(function (response) {
+                            if(response.data.rspCode!="000000"){
+                                toastr.error(response.data.rspCode+" "+response.data.rspMsg);
+                            }else {
+                                toastr.success(response.data.rspMsg);
+                                setTimeout(function () { location.href = webRoot +"admin/app/list"; }, 1000);
+                            }
+                        })
+                        .catch(function (error) {
+                            toastr.error(error);
+                        });
+                },
+                saveCategory:function(){
+                    var posturl =webRoot + 'api/category/save' ;
+                    var cat = this.category;
+                    axios.post(posturl, cat)
+                        .then(function (response) {
+                            var _cat = response.data;
+                            app.$data.categories.push(_cat);
+                            app.$data.appdata.categoryId = _cat.id;
+                            $("#modal-category").modal("hide");
+                        })
+                        .catch(function (error) {
+                            toastr.error(error);
+                        });
+                },
+                addCat:function(){
+                    this.category = {editType:"新增"};
+                    $("#modal-category").modal();
+                },
+                openFile:function () {
+                    fileManagerController.open(insertAppLogoCallback);
+                }
+            },
+            beforeMount() {
+                if (fromQueryString('id')) {
+                    this.id = fromQueryString('id');
+                }
+                this.load();
+            }
+        })
+
+
+    </script>
+
+
+    <script src="/admin/js/app/fileManagerController.js"></script>
+</th:block>

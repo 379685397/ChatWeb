@@ -1,0 +1,267 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="admin/layout">
+
+
+    <div layout:fragment="content" >
+        <!-- content-->
+
+
+        <div class="bf-main">
+            <div th:replace="admin/fragment/sidebar::fragSidebar"></div>
+            <div id="app"   class="bf-body">
+                <form>
+                    <div id="about-page" class="bf-posts-grid d-flex">
+
+                        <h4>用户管理</h4>
+                        <a  style="float: left;width: 10%" href="#" v-on:click="add()" class="btn btn-sm btn-link">新增 <strong>+</strong></a>
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>用户名</th>
+                                <th>邮箱</th>
+                                <th>创建时间</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr v-for="user in users">
+                                <td>{{user.id}}</td>
+                                <td>{{user.userName}}</td>
+                                <td>{{user.email}}</td>
+                                <td>{{dateFormat(user.createTime)}}</td>
+                                <td><a href="#" v-on:click="edit(user.id)">编辑</a>
+                                    <a href="#" v-on:click="remove(user.id)">删除</a>
+                                    <a href="#" v-on:click="openPwdModal(user.id)">重置密码</a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+
+                    </div>
+                </form>
+
+                <!-- Modal User -->
+                <div>
+                    <div class="modal fade" id="modal-user" tabindex="-1" role="dialog" aria-labelledby="notificationsLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h4 class="modal-title" id="settingsLabel">{{user.editType}}用户</h4>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><i class="fa fa-times"></i></button>
+                                </div>
+                                <div class="modal-body">
+
+                                    <div class="form-group">
+                                        <label class="form-group-label">
+                                            用户名:
+                                        </label>
+                                        <input type="text" class="form-control" v-model="user.userName" >
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-group-label">
+                                            邮箱:
+                                        </label>
+                                        <input type="text" class="form-control" v-model="user.email" >
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-group-label">
+                                            密码:
+                                        </label>
+                                        <input type="text" class="form-control" v-model="user.passWord">
+                                    </div>
+
+                                </div>
+
+                                <div class="modal-footer d-flex">
+                                    <button class="btn btn-link btn-sm btn-rounded ml-auto" type="button" data-dismiss="modal">取消</button>
+                                    <button   class="btn btn-primary btn-sm btn-rounded" type="button" v-on:click="save()">保存</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="modal fade" id="dlgChangePwd" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4 class="modal-title" id="hdrSettings">更改密码</h4>
+                                <button type="button" class="close ml-2" title="Close" data-placement="bottom" data-tooltip data-dismiss="modal" aria-label="close">
+                                    <i class="fa fa-times"></i>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="settings-body">
+                                    <form>
+                                        <div class="bf-content bf-content-boxed bf-settings">
+
+                                            <div class="form-group">
+                                                <label class="form-group-label">新密码</label>
+                                                <input v-model.trim="$v.password.newPassword.$model" :class="['form-control', status($v.password.newPassword)]" type="password" />
+                                                <label v-if="!$v.password.newPassword.required" class="val-error">Required</label>
+                                                <label v-if="!$v.password.newPassword.minLength" class="val-error">At least 4 characters</label>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-group-label">确认密码</label>
+                                                <input v-model.trim="$v.password.confirmPassword.$model" :class="['form-control', status($v.password.confirmPassword)]" type="password" />
+                                                <label v-if="!$v.password.confirmPassword.required" class="val-error">Required</label>
+                                                <label v-if="!$v.password.confirmPassword.minLength" class="val-error">At least 4 characters</label>
+                                                <label v-if="!$v.password.confirmPassword.sameAsPassword" class="val-error">New and confirm passwords do not match</label>
+                                            </div>
+                                            <button type="button" :disabled="$v.password.$invalid" v-on:click="change($v)" class="btn btn-primary btn-main">保存</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+
+    </div>
+
+
+
+</div>
+
+
+<th:block layout:fragment = "bodyAssets">
+    <!--尾部-->
+    <script>
+        Vue.use(window.vuelidate.default)
+        const { required, minLength, email, sameAs } = window.validators
+
+        const app = new Vue({
+            el: '#app',
+            data: {
+                users: {},
+                user:{editType:"新增"},
+                password: {
+                    userName: '',
+                    newPassword: '',
+                    confirmPassword: ''
+                }
+            },
+            validations: {
+                author: {
+                    displayName: { required },
+                    email: { required, email }
+                },
+                password: {
+                    newPassword: { required, minLength: minLength(4) },
+                    confirmPassword: { required, minLength: minLength(4), sameAsPassword: sameAs('newPassword') }
+                }
+            },
+            methods: {
+                load: function () {
+                    axios.get(webRoot + 'api/authors')
+                        .then(response => {
+                        this.users = response.data;
+                     }).catch(function (error) { toastr.error(error); });
+                },
+                save: function () {
+                    var posturl =webRoot + 'api/authors/save' ;
+                    var user = this.user;
+
+                    axios.post(posturl, user)
+                        .then(function (response) {
+                            toastr.success('保存成功');
+                            $("#modal-user").modal("hide");
+                            location.reload();
+                        }).catch(function (error) {toastr.error(error); });
+
+                    return false;
+                },
+                edit:function (id) {
+                    axios.get(webRoot + 'api/authors/'+id)
+                        .then(response => {
+                        this.user = response.data;
+                        this.user.editType = "编辑";
+                    }).catch(function (error) { toastr.error(error); });
+                    $("#modal-user").modal();
+                },
+                add:function () {
+                    this.user = {editType:"新增"};
+                    $("#modal-user").modal();
+                },
+                remove:function (id) {
+                    var result = confirm("Please confirm removing this user");
+                    if (result) {
+                        axios.delete(webRoot + 'api/authors/remove/' + id)
+                            .then(response => {
+                            toastr.success(response.data.rspMsg);
+                        this.load();
+                    })
+                    .catch(function (error) { toastr.error(error); });
+                    }
+                    return false;
+                },
+                status(v) {
+                    return {
+                        error: v.$error,
+                        dirty: v.$dirty
+                    }
+                },
+                change:function(v){
+                    this.password.userName = this.user.userName;
+                    if (v.password.$invalid) {
+                        toastr.error('Invalid');
+                    }
+                    else {
+                        axios.put(webRoot + 'api/authors/changepwd', this.password)
+                            .then(function (response) {
+                                if(response.data.rspCode!="000000"){
+                                    toastr.error(response.data.rspCode+" "+response.data.rspMsg);
+                                }else {
+                                    toastr.success(response.data.rspMsg);
+                                }
+                                $('#dlgChangePwd').modal('hide');
+                            })
+                            .catch(function (error) {
+                                toastr.error(error);
+                            });
+                    }
+                },
+                openPwdModal:function(id){
+                    $('#dlgChangePwd').modal();
+
+
+                    axios.get(webRoot + 'api/authors/'+id)
+                        .then(response => {
+                        this.user = response.data;
+                     }).catch(function (error) { toastr.error(error); });
+                    setTimeout(
+                        function () {
+                            $('#txtOldPwd').focus();
+                        }, 500);
+                },
+                dateFormat:function(time) {
+                    var date=new Date(time);
+                    var year=date.getFullYear();
+                    /* 在日期格式中，月份是从0开始的，因此要加0
+                     * 使用三元表达式在小于10的前面加0，以达到格式统一  如 09:11:05
+                     * */
+                    var month= date.getMonth()+1<10 ? "0"+(date.getMonth()+1) : date.getMonth()+1;
+                    var day=date.getDate()<10 ? "0"+date.getDate() : date.getDate();
+                    var hours=date.getHours()<10 ? "0"+date.getHours() : date.getHours();
+                    var minutes=date.getMinutes()<10 ? "0"+date.getMinutes() : date.getMinutes();
+                    var seconds=date.getSeconds()<10 ? "0"+date.getSeconds() : date.getSeconds();
+                    // 拼接
+                    return year+"-"+month+"-"+day+" "+hours+":"+minutes+":"+seconds;
+                }
+            },
+            beforeMount() {
+                this.load()
+            }
+        });
+
+    </script>
+</th:block>

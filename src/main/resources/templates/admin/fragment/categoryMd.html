@@ -1,0 +1,27 @@
+<div th:fragment="catFragment">
+    <div class="modal fade" id="modal-category" tabindex="-1" role="dialog" aria-labelledby="notificationsLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="settingsLabel">{{category.editType}}分类</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><i class="fa fa-times"></i></button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="form-group">
+                        <label class="form-group-label">
+                            名称:
+                        </label>
+                        <input type="text" class="form-control" v-model="category.name" >
+                    </div>
+
+                </div>
+
+                <div class="modal-footer d-flex">
+                    <button class="btn btn-link btn-sm btn-rounded ml-auto" type="button" data-dismiss="modal">取消</button>
+                    <button   class="btn btn-primary btn-sm btn-rounded" type="button" v-on:click="saveCategory()">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
