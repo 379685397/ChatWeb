@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class SecurityFilter implements Filter {
-    
+
     private static Set<String> GreenUrlSet = new HashSet<String>();
 
 
@@ -60,17 +60,4 @@ public class SecurityFilter implements Filter {
     public void destroy() {
 
     }
-
-    public String codeToString(String str) {
-        String strString = str;
-        try {
-            byte tempB[] = strString.getBytes("ISO-8859-1");
-            strString = new String(tempB);
-            return strString;
-        } catch (Exception e) {
-            return strString;
-        }
-    }
-
-
 }
