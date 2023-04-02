@@ -1,7 +1,7 @@
 # 1.前言
 
 前几天发表了一片保姆级JAVA对接ChatGPT教程，实现自己的AI对话助手的文章，发现对于一些未对接过的朋友们还是有些门槛。这两天把又代码整理了下，简单写了个web端聊天式对话机器人。供大家参考学习。
-![img.png](doc/db/img.png)
+![image](https://user-images.githubusercontent.com/34293665/229330058-e52f82a5-ce1c-4d15-ae8c-d56fd1557153.png)
 
 # 2.项目介绍
 
@@ -13,7 +13,7 @@
 
 ### 2.1.2 网络拓扑
 
-![img_1.png](doc/db/img_1.png)
+![image](https://user-images.githubusercontent.com/34293665/229330072-beffdac2-1b3f-4d3d-b5f4-3581ac27af98.png)
 因为访问openai是不通的，所以我们中间需要搭建一个代理服务（有魔法科技的当我没说），通过代理服务访问openapi，代理服务部署在香港即可。
 
 ## 2.2.目录结构
@@ -23,7 +23,7 @@
 - doc：存放数据库脚本以及文档
 - src/main/java：后端工程
 - resource/static 和 template：前端工程文件
-  ![img_2.png](doc/db/img_2.png)
+![image](https://user-images.githubusercontent.com/34293665/229330110-00ad5f54-0b85-4ba2-a6b3-5da7a0237b85.png)
 
 ## 2.3.项目启动
 
@@ -40,30 +40,13 @@
 #spring.profiles.active = dev
 server.port = 8999
 spring.application.name = OpenAi
-#
-#
-#
-#
-#
-#  db
-config
-start
-#
-#
-#
-#
-#
-#
-    spring.datasource.url = jdbc
-:
-mysql://XXXX:3306/chatweb?serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8
-    spring.datasource.username = XXXX
+######  db config start######
+spring.datasource.url = jdbc:mysql://XXXX:3306/chatweb?serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8
+spring.datasource.username = XXXX
 spring.datasource.password = XXX
 spring.datasource.driver - class - name = com.mysql.cj.jdbc.Driver
 #mybatis
-mybatis.mapper - locations = classpath
-:
-mapper/*.xml
+mybatis.mapper - locations = classpath:mapper/*.xml
 mybatis.type-aliases-package=com.wentap.mapper
 mybatis.configuration.map-underscore-to-camel-case=true
 mybatis.configuration.call-setters-on-nulls=true
@@ -85,20 +68,18 @@ session.time=4
 token.num=500
 spring.thymeleaf.mode=LEGACYHTML5
 ```
-
 1. 编译项目，之后运行**`ChatWebApplication`**
 2. 执行成功之后访问[http://127.0.0.1:8999](http://127.0.0.1:8999/)即可打开页面
-   ![img_3.png](doc/db/img_3.png)
+![image](https://user-images.githubusercontent.com/34293665/229330117-cd383e63-5f7e-4d88-8cc9-09e87d56fb6f.png)
+
 
 ## 2.4.项目部署
 
 如果大家想把项目部署云服务器上，则只需要如下操作
 
 1. 在IDEA中，执行maven install 命令，待编译完成之后在targer目录下生成jar包。
-   ![img_4.png](doc/db/img_4.png)
+![image](https://user-images.githubusercontent.com/34293665/229330125-487f06c0-ef12-45cb-80c8-d46aca2b61e2.png)
 1. 在IDEA中，执行maven install 命令，待编译完成之后在targer目录下生成chatweb-1.0.jar包
 2. 将服务中的start.sh、stop.sh脚本和chatweb-1.0.jar包一起丢到云服务器上
 3. 执行start.sh脚本即可
 4. 如果是windows下，则直接在jar包所在目录执行java -jar chatweb-1.0.jar 即可。
-
-# 3.git项目地址
