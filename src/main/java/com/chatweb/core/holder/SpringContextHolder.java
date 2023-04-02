@@ -5,12 +5,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 /**
- * @author robotbird
+ * @author teacher wang
  * @version 1.0
- * @website http://webtap.cn
- * @date 2020-05-03 16:45
  **/
-public class SpringContextHolder implements ApplicationContextAware{
+public class SpringContextHolder implements ApplicationContextAware {
     private static ApplicationContext appContext = null;
 
     /**
